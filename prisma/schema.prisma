@@ -18,3 +18,49 @@ model Post {
 
     @@index([name])
 }
+
+enum ExperimentStatus {
+  draft
+  active
+  paused
+  completed
+}
+
+model Experiment {
+  id        String            @id @default(cuid())
+  name      String            @unique
+  status    ExperimentStatus  @default(draft)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  variants    Variant[]
+  assignments Assignment[]
+}
+
+model Variant {
+  id           String      @id @default(cuid())
+  experiment   Experiment  @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+  experimentId String
+  key          String
+  weight       Int         @default(1)
+  isActive     Boolean     @default(true)
+
+  assignments  Assignment[] @relation("VariantAssignments")
+
+  @@unique([experimentId, key])
+}
+
+model Assignment {
+  id           String      @id @default(cuid())
+  userId       String
+  experiment   Experiment  @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+  experimentId String
+
+  variant      Variant     @relation("VariantAssignments", fields: [variantId], references: [id], onDelete: Restrict)
+  variantId    String
+
+  createdAt    DateTime    @default(now())
+
+  @@unique([userId, experimentId])
+  @@index([experimentId, variantId])
+}

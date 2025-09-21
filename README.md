@@ -1,29 +1,214 @@
-# Create T3 App
+# A/B Testing MVP
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+A full-stack A/B testing platform built with Next.js, tRPC, Prisma, and TypeScript. This application allows you to create experiments, manage variants, and assign users to different test groups with weighted distribution.
 
-## What's next? How do I make an app with this?
+## 🚀 Features
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+### 📊 Experiments Management
+- **Create Experiments**: Set up new A/B tests with customizable names and statuses
+- **Status Tracking**: Manage experiment lifecycle (Draft → Active → Paused → Completed)
+- **CRUD Operations**: Full create, read, update, and delete functionality
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+### 🎯 Variants Management
+- **Multiple Variants**: Create multiple test variations for each experiment
+- **Weighted Distribution**: Assign custom weights to control traffic distribution
+- **Active/Inactive States**: Enable or disable variants without deletion
+- **Automatic Linking**: Variants are automatically associated with their parent experiments
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+### 👥 User Assignment System (_________________ TBD _________________)
+- **Deterministic Assignment**: Users get consistent variant assignments based on hashing
+- **Weighted Random Selection**: Respects variant weights for fair distribution
+- **Assignment Tracking**: View and manage user-to-variant assignments
+- **Assignment Dialog**: Easy interface to manually assign users to experiments
 
-## Learn More
+## 🛠 Tech Stack
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+- **Framework**: [Next.js 15](https://nextjs.org/) with App Router
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Database**: SQLite with [Prisma ORM](https://www.prisma.io/)
+- **API**: [tRPC](https://trpc.io/) for type-safe APIs
+- **UI**: [Tailwind CSS](https://tailwindcss.com/) + [Radix UI](https://www.radix-ui.com/)
+- **State Management**: [TanStack Query](https://tanstack.com/query) via tRPC
+- **Validation**: [Zod](https://zod.dev/) schemas
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+## 📁 Project Structure
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+```
+src/
+├── app/
+│   ├── _components/          # React components
+│   │   ├── experiments.tsx   # Experiments list and management
+│   │   ├── experimentDialog.tsx # Create/edit experiments
+│   │   ├── variants.tsx      # Variants list and management
+│   │   ├── variantDialog.tsx # Create/edit variants
+│   │   ├── assignments.tsx   # User assignments interface
+│   │   └── assignmentDialog.tsx # Manual user assignment
+│   ├── layout.tsx           # Root layout
+│   └── page.tsx            # Main page with tabs
+├── server/
+│   ├── api/
+│   │   ├── routers/         # tRPC routers
+│   │   │   ├── experiment.ts # Experiment CRUD operations
+│   │   │   ├── variant.ts   # Variant CRUD operations
+│   │   │   └── assignment.ts # Assignment logic
+│   │   ├── root.ts         # Main tRPC router
+│   │   └── trpc.ts         # tRPC configuration
+│   └── db.ts               # Prisma client setup
+└── trpc/                   # tRPC client configuration
+prisma/
+├── schema.prisma           # Database schema
+└── migrations/             # Database migrations
+```
 
-## How do I deploy this?
+## 🗄 Database Schema
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+### Experiment
+- `id`: Unique identifier (CUID)
+- `name`: Experiment name (unique)
+- `status`: Current status (draft, active, paused, completed)
+- `createdAt`/`updatedAt`: Timestamps
+- 'variants': Variant[]
+
+### Variant
+- `id`: Unique identifier (CUID)
+- `experimentId`: Foreign key to experiment
+- `key`: Variant identifier within experiment
+- `weight`: Distribution weight (default: 1)
+- `isActive`: Enable/disable flag
+
+### Assignment
+- `id`: Unique identifier (CUID)
+- `userId`: User identifier
+- `experimentId`: Foreign key to experiment
+- `variantId`: Foreign key to assigned variant
+- `createdAt`: Assignment timestamp
+
+## 🚦 Getting Started
+
+### Prerequisites
+- Node.js 18+ and npm
+- Git
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd ab-test-mvp
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env
+   ```
+   Edit `.env` and configure your database URL:
+   ```
+   DATABASE_URL="file:./db.sqlite"
+   ```
+
+4. **Initialize the database**
+   ```bash
+   npx prisma migrate dev --name init
+   npx prisma generate
+   ```
+
+5. **Start the development server**
+   ```bash
+   npm run dev
+   ```
+
+6. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+## 📖 Usage Guide
+
+### Creating an Experiment
+1. Go to the **Experiments** tab
+2. Click **"Create new Experiment"**
+3. Enter experiment name and select initial status
+4. Submit to create the experiment
+
+### Adding Variants
+1. Go to the **Variants** tab
+2. Click **"Create new Variant"**
+3. Enter:
+   - Variant key (e.g., "control", "treatment-a")
+   - Experiment ID
+   - Weight (higher = more traffic)
+4. Submit to create the variant
+
+### Assigning Users
+1. Go to the **Assignments** tab
+2. Click **"Assign User to Experiment"**
+3. Enter User ID and Experiment ID
+4. The system automatically assigns based on variant weights
+
+### Assignment Algorithm
+The system uses deterministic assignment based on:
+```typescript
+const seed = `${userId}:${experimentId}`;
+// Hash the seed and use modulo for consistent assignment
+```
+
+This ensures:
+- ✅ Same user always gets the same variant
+- ✅ Respects variant weights
+- ✅ Even distribution across users
+
+## 🔧 Available Scripts
+
+```bash
+# Development
+npm run dev          # Start development server with Turbo
+npm run build        # Build for production
+npm run start        # Start production server
+npm run preview      # Build and start production server
+
+# Database
+npm run db:generate  # Generate Prisma client and run migrations
+npm run db:migrate   # Deploy migrations to production
+npm run db:push      # Push schema changes without migrations
+npm run db:studio    # Open Prisma Studio
+
+# Code Quality
+npm run lint         # Run ESLint
+npm run lint:fix     # Fix ESLint errors automatically
+npm run typecheck    # Run TypeScript compiler check
+npm run format:check # Check code formatting
+npm run format:write # Format code with Prettier
+npm run check        # Run both linting and type checking
+```
+
+## 🧪 API Endpoints (tRPC)
+
+### Experiments
+- `experiment.list` - Get all experiments
+- `experiment.create` - Create new experiment
+- `experiment.update` - Update experiment
+- `experiment.delete` - Delete experiment
+
+### Variants
+- `variant.list` - Get all variants
+- `variant.listByExperiment` - Get variants for specific experiment
+- `variant.create` - Create new variant
+- `variant.upsertMany` - Bulk create/update variants
+
+### Assignments
+- `assignment.get` - Get user's assignment for experiment
+- `assignment.assign` - Assign user to experiment (auto-selects variant)
+
+## 🎨 UI Components
+
+
+## 🔒 Environment Variables
+
+Create a `.env` file with:
+```env
+DATABASE_URL="file:./db.sqlite"
+NODE_ENV="development"
+```
