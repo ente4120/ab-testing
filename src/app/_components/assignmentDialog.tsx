@@ -22,7 +22,6 @@ export default function AssignmentDialog() {
     const assignUser = api.assignment.assign.useMutation({
         onSuccess: (data) => {
             setResult(`User assigned to variant: ${data.variantKey}`);
-            // Clear form after showing result briefly
             setTimeout(() => {
                 setUserId("");
                 setExperimentId("");

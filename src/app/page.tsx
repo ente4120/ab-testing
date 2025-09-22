@@ -5,6 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
 import { Assignments } from "./_components/assignments";
 import { ThemeToggle } from "~/components/theme-toggle";
 
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
   return (
     <HydrateClient>

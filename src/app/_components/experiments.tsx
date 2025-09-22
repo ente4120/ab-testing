@@ -68,7 +68,7 @@ export function Experiments() {
                     {experiment.createdAt.toLocaleDateString()}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {(experiment as any).variants?.map((variant: any) => (
+                    {experiment.variants?.map((variant) => (
                       <Badge variant="outline" key={variant.id}>
                         {variant.key}
                       </Badge>
@@ -77,7 +77,7 @@ export function Experiments() {
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <ExperimentDialog 
-                        experiment={experiment as any}
+                        experiment={experiment}
                         mode="edit"
                       />
                       <Button
