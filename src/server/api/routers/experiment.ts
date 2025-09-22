@@ -8,7 +8,6 @@ const ExperimentCreateInput = z.object({
   variants: z.array(z.object({
     key: z.string(),
     weight: z.number(),
-    isActive: z.boolean(),
   })).optional(),
 });
 
@@ -19,13 +18,15 @@ const ExperimentUpdateInput = z.object({
   variants: z.array(z.object({
     key: z.string(),
     weight: z.number(),
-    isActive: z.boolean(),
   })).optional(),
 });
 
 export const experimentRouter = createTRPCRouter({
   list:  publicProcedure.query(({ ctx }) => {
     return ctx.db.experiment.findMany({
+        include: {
+          variants: true
+        },
         orderBy: { createdAt: 'desc' }
     })
   }),

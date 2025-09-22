@@ -6,6 +6,8 @@ import {
     DialogTitle,
     DialogTrigger,
   } from "~/components/ui/dialog";
+import { Button } from "~/components/ui/button";
+import { Plus } from "lucide-react";
 
 import { api } from "~/trpc/react";
 
@@ -30,14 +32,19 @@ export default function VariantDialog() {
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger className="w-60 bg-pink-500 rounded-full p-1">Create new Variant</DialogTrigger>
+            <DialogTrigger asChild>
+                <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Experiment
+                </Button>
+            </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
                 <DialogTitle>Create new Variant</DialogTitle>
                 <form
                     onSubmit={(e) => {
                     e.preventDefault();
-                    createNewVariant.mutate({ key, experimentId, weight, isActive: true });
+                    createNewVariant.mutate({ key, experimentId, weight });
                     }}
                     className="flex flex-col gap-4 mt-4"
                 >

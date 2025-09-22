@@ -74,7 +74,6 @@ prisma/
 - `experimentId`: Foreign key to experiment
 - `key`: Variant identifier within experiment
 - `weight`: Distribution weight (default: 1)
-- `isActive`: Enable/disable flag
 
 ### Assignment
 - `id`: Unique identifier (CUID)

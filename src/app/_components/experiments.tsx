@@ -67,7 +67,13 @@ export function Experiments() {
                   <TableCell className="text-muted-foreground">
                     {experiment.createdAt.toLocaleDateString()}
                   </TableCell>
-                  <TableCell className="text-muted-foreground">-</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {(experiment as any).variants?.map((variant: any) => (
+                      <Badge variant="outline" key={variant.id}>
+                        {variant.key}
+                      </Badge>
+                    )) ?? []}
+                  </TableCell>
                   <TableCell className="text-right">
                     <Button
                       variant="outline"

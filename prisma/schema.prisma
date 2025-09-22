@@ -43,7 +43,6 @@ model Variant {
   experimentId String
   key          String
   weight       Int         @default(1)
-  isActive     Boolean     @default(true)
 
   assignments  Assignment[] @relation("VariantAssignments")
 

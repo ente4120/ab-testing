@@ -26,7 +26,6 @@ export function Variants() {
                 <TableHead>ID</TableHead>
                 <TableHead>Key</TableHead>
                 <TableHead>Weight</TableHead>
-                <TableHead>Status</TableHead>
                 <TableHead>Experiment ID</TableHead>
               </TableRow>
             </TableHeader>
@@ -36,11 +35,6 @@ export function Variants() {
                   <TableCell className="font-mono text-sm">{variant.id}</TableCell>
                   <TableCell className="font-medium">{variant.key}</TableCell>
                   <TableCell>{variant.weight}</TableCell>
-                  <TableCell>
-                    <Badge variant={variant.isActive ? "default" : "secondary"}>
-                      {variant.isActive ? "Active" : "Inactive"}
-                    </Badge>
-                  </TableCell>
                   <TableCell className="font-mono text-sm text-muted-foreground">
                     {variant.experimentId}
                   </TableCell>

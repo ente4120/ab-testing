@@ -7,14 +7,12 @@ export const Variant = z.object({
   key: z.string(),
   experimentId: z.string().cuid(),
   weight: z.number().int().positive().default(1),
-  isActive: z.boolean().default(true),
 });
 
 export const VariantUpsert = z.object({
   id: z.string().cuid().optional(),
   key: z.string(),
   weight: z.number().int().positive().default(1),
-  isActive: z.boolean().default(true),
 });
 
 const VariantsUpsertManyInput = z.object({
@@ -35,7 +33,7 @@ export const variantRouter = createTRPCRouter({
     .query(({ ctx, input }) => {
       return ctx.db.variant.findMany({
         where: { experimentId: input.experimentId },
-        orderBy: [{ isActive: "desc" }, { key: "asc" }],
+        orderBy: [{ key: "asc" }],
       });
     }),
 
@@ -47,7 +45,6 @@ export const variantRouter = createTRPCRouter({
             key: input.key,
             experimentId: input.experimentId,
             weight: input.weight,
-            isActive: input.isActive,
           },
         });
 
@@ -56,7 +53,7 @@ export const variantRouter = createTRPCRouter({
           include: { variants: true },
         });
 
-        const variants = [...(experiment?.variants || []), newVariant];
+        const variants = [...(experiment?.variants ?? []), newVariant];
 
         await ctx.db.experiment.update({
           where: { id: input.experimentId },
@@ -84,13 +81,11 @@ export const variantRouter = createTRPCRouter({
           update: {
             key: v.key,
             weight: v.weight ?? 1,
-            isActive: v.isActive ?? true,
           },
           create: {
             experimentId,
             key: v.key,
             weight: v.weight ?? 1,
-            isActive: v.isActive ?? true,
           },
         })
       );

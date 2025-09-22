@@ -4,7 +4,6 @@ CREATE TABLE "Variant" (
     "experimentId" TEXT NOT NULL,
     "key" TEXT NOT NULL,
     "weight" INTEGER NOT NULL DEFAULT 1,
-    "isActive" BOOLEAN NOT NULL DEFAULT true,
     CONSTRAINT "Variant_experimentId_fkey" FOREIGN KEY ("experimentId") REFERENCES "Experiment" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
