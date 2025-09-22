@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Dialog,
     DialogContent,
@@ -10,16 +10,31 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Edit } from "lucide-react";
 
 import { api } from "~/trpc/react";
 
 interface VariantInput {
+    id?: string;
     key: string;
     weight: number;
 }
 
-export default function ExperimentDialog() {
+interface ExperimentDialogProps {
+    experiment?: {
+        id: string;
+        name: string;
+        status: "draft" | "active" | "paused" | "completed";
+        variants: Array<{
+            id: string;
+            key: string;
+            weight: number;
+        }>;
+    };
+    mode?: "create" | "edit";
+}
+
+export default function ExperimentDialog({ experiment, mode = "create" }: ExperimentDialogProps) {
     const utils = api.useUtils();
     const [name, setName] = useState("");
     const [status, setStatus] = useState<"draft" | "active" | "paused" | "completed">("draft");
@@ -30,7 +45,27 @@ export default function ExperimentDialog() {
     const [open, setOpen] = useState(false);
     
     const createNewExperiment = api.experiment.create.useMutation();
+    const updateExperiment = api.experiment.update.useMutation();
     const createVariants = api.variant.upsertMany.useMutation();
+
+    useEffect(() => {
+        if (mode === "edit" && experiment) {
+            setName(experiment.name);
+            setStatus(experiment.status);
+            setVariants(experiment.variants.map(v => ({
+                id: v.id,
+                key: v.key,
+                weight: v.weight
+            })));
+        } else {
+            setName("");
+            setStatus("draft");
+            setVariants([
+                { key: "control", weight: 1 },
+                { key: "treatment", weight: 1 }
+            ]);
+        }
+    }, [mode, experiment]);
 
     const addVariant = () => {
         setVariants([...variants, { key: "", weight: 1 }]);
@@ -47,41 +82,72 @@ export default function ExperimentDialog() {
         updatedVariants[index] = { 
             ...updatedVariants[index], 
             [field]: field === "key" ? String(value) : Number(value)
-        };
+        } as VariantInput;
         setVariants(updatedVariants);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
-        const experiment = await createNewExperiment.mutateAsync({ name, status, variants });
-        const validVariants = variants.filter(v => v.key.trim() !== "");
-        if (validVariants.length > 0) {
-            await createVariants.mutateAsync({
-                experimentId: experiment.id,
-                variants: validVariants.map(v => ({
-                    key: v.key,
-                    weight: v.weight
-                }))
+        e.preventDefault();
+        
+        if (mode === "create") {
+            const newExperiment = await createNewExperiment.mutateAsync({ name, status, variants });
+            const validVariants = variants.filter(v => v.key.trim() !== "");
+            if (validVariants.length > 0) {
+                await createVariants.mutateAsync({
+                    experimentId: newExperiment.id,
+                    variants: validVariants.map(v => ({
+                        key: v.key,
+                        weight: v.weight
+                    }))
+                });
+            }
+        } else if (mode === "edit" && experiment) {
+            await updateExperiment.mutateAsync({
+                id: experiment.id,
+                name,
+                status,
+                variants
             });
+            
+            const validVariants = variants.filter(v => v.key.trim() !== "");
+            if (validVariants.length > 0) {
+                await createVariants.mutateAsync({
+                    experimentId: experiment.id,
+                    variants: validVariants.map(v => ({
+                        id: v.id,
+                        key: v.key,
+                        weight: v.weight
+                    }))
+                });
+            }
         }
+        
         await utils.experiment.invalidate();
         await utils.variant.invalidate();
-        setName("");
-        setStatus("draft");
-        setVariants([{ key: "control", weight: 1 }, { key: "treatment", weight: 1 }]);
         setOpen(false);
     };
+
+    const triggerButton = mode === "edit" ? (
+        <Button variant="outline" size="sm">
+            <Edit className="h-4 w-4" />
+        </Button>
+    ) : (
+        <Button>
+            <Plus className="h-4 w-4 mr-2" />
+            Create Experiment
+        </Button>
+    );
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create Experiment
-                </Button>
+                {triggerButton}
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Create New Experiment</DialogTitle>
+                    <DialogTitle>
+                        {mode === "edit" ? "Edit Experiment" : "Create New Experiment"}
+                    </DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="grid gap-4 py-4">
                     <div className="grid gap-2">
@@ -172,12 +238,12 @@ export default function ExperimentDialog() {
                     
                     <Button 
                         type="submit" 
-                        disabled={createNewExperiment.isPending || createVariants.isPending} 
+                        disabled={createNewExperiment.isPending || updateExperiment.isPending || createVariants.isPending} 
                         className="mt-4"
                     >
-                        {createNewExperiment.isPending || createVariants.isPending 
-                            ? "Creating..." 
-                            : "Create Experiment & Variants"
+                        {createNewExperiment.isPending || updateExperiment.isPending || createVariants.isPending
+                            ? (mode === "edit" ? "Updating..." : "Creating...")
+                            : (mode === "edit" ? "Update Experiment" : "Create Experiment & Variants")
                         }
                     </Button>
                 </form>

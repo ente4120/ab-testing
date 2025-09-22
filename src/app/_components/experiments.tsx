@@ -75,14 +75,20 @@ export function Experiments() {
                     )) ?? []}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDeleteExperiment(experiment.id)}
-                      disabled={deleteExperimentMutation.isPending}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex justify-end gap-2">
+                      <ExperimentDialog 
+                        experiment={experiment as any}
+                        mode="edit"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDeleteExperiment(experiment.id)}
+                        disabled={deleteExperimentMutation.isPending}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

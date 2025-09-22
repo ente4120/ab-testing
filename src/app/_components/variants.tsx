@@ -2,7 +2,6 @@
 
 import VariantDialog from "~/app/_components/variantDialog";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "~/components/ui/table";
-import { Badge } from "~/components/ui/badge";
 import { api } from "~/trpc/react";
 
 export function Variants() {
@@ -27,6 +26,7 @@ export function Variants() {
                 <TableHead>Key</TableHead>
                 <TableHead>Weight</TableHead>
                 <TableHead>Experiment ID</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -37,6 +37,14 @@ export function Variants() {
                   <TableCell>{variant.weight}</TableCell>
                   <TableCell className="font-mono text-sm text-muted-foreground">
                     {variant.experimentId}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
+                      <VariantDialog 
+                        variant={variant}
+                        mode="edit"
+                      />
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

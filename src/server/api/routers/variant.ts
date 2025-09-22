@@ -20,6 +20,12 @@ const VariantsUpsertManyInput = z.object({
     variants: z.array(VariantUpsert).min(1),
   });
 
+const VariantUpdateInput = z.object({
+  id: z.string().cuid(),
+  key: z.string().optional(),
+  weight: z.number().int().positive().optional(),
+});
+
 export const variantRouter = createTRPCRouter({
     list: publicProcedure
     .query(({ ctx }) => {
@@ -92,5 +98,17 @@ export const variantRouter = createTRPCRouter({
 
       const result = await ctx.db.$transaction(ops);
       return result;
+    }),
+
+    update: publicProcedure
+    .input(VariantUpdateInput)
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.variant.update({
+        where: { id: input.id },
+        data: {
+          ...(input.key ? { key: input.key } : {}),
+          ...(input.weight ? { weight: input.weight } : {}),
+        },
+      });
     }),
 });
